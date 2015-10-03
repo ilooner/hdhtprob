@@ -11,6 +11,7 @@ import com.datatorrent.lib.appdata.gpo.GPOUtils;
 import com.datatorrent.netlet.util.Slice;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang3.mutable.MutableInt;
@@ -20,6 +21,7 @@ public class HDHTTestOperator extends AbstractSinglePortHDHTWriter<Double>
 {
   private long windowId;
   private transient boolean called = false;
+  private transient Random rand = new Random();
 
   @Override
   public void beginWindow(long windowId)
@@ -27,22 +29,39 @@ public class HDHTTestOperator extends AbstractSinglePortHDHTWriter<Double>
     super.beginWindow(windowId);
     this.windowId = windowId;
 
-    byte[] result = null;
-
     if (!called) {
       called = true;
-      try {
-        result = this.get(0, new Slice(GPOUtils.serializeInt(0)));
-      } catch (IOException ex) {
-        throw new RuntimeException(ex);
-      }
 
-      if (result != null) {
-        long storedWindowId = GPOUtils.deserializeLong(result);
+      checkBucket(0L);
+      checkBucket(1L);
+    }
+  }
 
-        if (storedWindowId > windowId) {
-          LOG.info("The stored Window ID is less than the window ID {} {}", storedWindowId, windowId);
-        }
+  @Override
+  public void processEvent(Double val)
+  {
+    try {
+      this.put(rand.nextInt(2), new Slice(GPOUtils.serializeInt(rand.nextInt(Integer.MAX_VALUE))), GPOUtils.serializeDouble(val));
+    } catch (IOException ex) {
+      throw new RuntimeException(ex);
+    }
+  }
+
+  private void checkBucket(long bucket)
+  {
+    byte[] result = null;
+
+    try {
+      result = this.get(bucket, new Slice(GPOUtils.serializeInt(0)));
+    } catch (IOException ex) {
+      throw new RuntimeException(ex);
+    }
+
+    if (result != null) {
+      long storedWindowId = GPOUtils.deserializeLong(result);
+
+      if (storedWindowId > windowId) {
+        LOG.info("The stored Window ID is less than the window ID {} {}", storedWindowId, windowId);
       }
     }
   }
@@ -51,7 +70,13 @@ public class HDHTTestOperator extends AbstractSinglePortHDHTWriter<Double>
   public void endWindow()
   {
     try {
-      this.put(0, new Slice(GPOUtils.serializeInt(0)), GPOUtils.serializeLong(windowId));
+      this.put(0L, new Slice(GPOUtils.serializeInt(0)), GPOUtils.serializeLong(windowId));
+    } catch (IOException ex) {
+      throw new RuntimeException(ex);
+    }
+
+    try {
+      this.put(1L, new Slice(GPOUtils.serializeInt(0)), GPOUtils.serializeLong(windowId));
     } catch (IOException ex) {
       throw new RuntimeException(ex);
     }
