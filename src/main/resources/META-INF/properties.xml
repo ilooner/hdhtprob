@@ -20,6 +20,5 @@
     <name>dt.operator.*.attr.CHECKPOINT_WINDOW_COUNT</name>
     <value>20</value>
   </property>
-  <property>
 </configuration>
 
