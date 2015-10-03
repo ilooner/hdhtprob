@@ -61,7 +61,7 @@ public class HDHTTestOperator extends AbstractSinglePortHDHTWriter<Double>
     return new MyCodec();
   }
 
-  public class MyCodec implements HDHTCodec<Double>, Serializable
+  public static class MyCodec implements HDHTCodec<Double>, Serializable
   {
     private static final long serialVersionUID = 201510020616L;
 
