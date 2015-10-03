@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.slf4j.LoggerFactory;
 
 public class HDHTTestOperator extends AbstractSinglePortHDHTWriter<Double>
@@ -23,6 +24,7 @@ public class HDHTTestOperator extends AbstractSinglePortHDHTWriter<Double>
   @Override
   public void beginWindow(long windowId)
   {
+    super.beginWindow(windowId);
     this.windowId = windowId;
 
     byte[] result = null;
@@ -53,6 +55,8 @@ public class HDHTTestOperator extends AbstractSinglePortHDHTWriter<Double>
     } catch (IOException ex) {
       throw new RuntimeException(ex);
     }
+
+    super.endWindow();
   }
 
   @Override
@@ -68,13 +72,13 @@ public class HDHTTestOperator extends AbstractSinglePortHDHTWriter<Double>
     @Override
     public byte[] getKeyBytes(Double event)
     {
-      return null;
+      return GPOUtils.serializeDouble(event);
     }
 
     @Override
     public byte[] getValueBytes(Double event)
     {
-      return null;
+      return GPOUtils.serializeDouble(event);
     }
 
     @Override
@@ -86,13 +90,13 @@ public class HDHTTestOperator extends AbstractSinglePortHDHTWriter<Double>
     @Override
     public Object fromByteArray(Slice fragment)
     {
-      return null;
+      return (Double) GPOUtils.deserializeDouble(fragment.buffer, new MutableInt(0));
     }
 
     @Override
     public Slice toByteArray(Double o)
     {
-      return null;
+      return new Slice(GPOUtils.serializeDouble(o));
     }
 
     @Override
