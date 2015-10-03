@@ -22,6 +22,7 @@ public class HDHTTestOperator extends AbstractSinglePortHDHTWriter<Double>
   private long windowId;
   private transient boolean called = false;
   private transient Random rand = new Random();
+  private int numBuckets = 6;
 
   @Override
   public void beginWindow(long windowId)
@@ -32,16 +33,25 @@ public class HDHTTestOperator extends AbstractSinglePortHDHTWriter<Double>
     if (!called) {
       called = true;
 
-      checkBucket(0L);
-      checkBucket(1L);
+      for(int bucketCounter = 0; bucketCounter < numBuckets; bucketCounter++) {
+        checkBucket(bucketCounter);
+      }
     }
   }
 
   @Override
   public void processEvent(Double val)
   {
+    int key = rand.nextInt(Integer.MAX_VALUE - 1) + 1;
+
     try {
-      this.put(rand.nextInt(2), new Slice(GPOUtils.serializeInt(rand.nextInt(Integer.MAX_VALUE))), GPOUtils.serializeDouble(val));
+      this.get(rand.nextInt(numBuckets), new Slice(GPOUtils.serializeInt(key)));
+    } catch (IOException ex) {
+      throw new RuntimeException(ex);
+    }
+
+    try {
+      this.put(rand.nextInt(numBuckets), new Slice(GPOUtils.serializeInt(key)), GPOUtils.serializeDouble(val));
     } catch (IOException ex) {
       throw new RuntimeException(ex);
     }
@@ -69,19 +79,20 @@ public class HDHTTestOperator extends AbstractSinglePortHDHTWriter<Double>
   @Override
   public void endWindow()
   {
-    try {
-      this.put(0L, new Slice(GPOUtils.serializeInt(0)), GPOUtils.serializeLong(windowId));
-    } catch (IOException ex) {
-      throw new RuntimeException(ex);
-    }
-
-    try {
-      this.put(1L, new Slice(GPOUtils.serializeInt(0)), GPOUtils.serializeLong(windowId));
-    } catch (IOException ex) {
-      throw new RuntimeException(ex);
+    for (int bucketCounter = 0; bucketCounter < numBuckets; bucketCounter++) {
+      putBucket(bucketCounter);
     }
 
     super.endWindow();
+  }
+
+  private void putBucket(int bucketCounter)
+  {
+    try {
+      this.put(bucketCounter, new Slice(GPOUtils.serializeInt(0)), GPOUtils.serializeLong(windowId));
+    } catch (IOException ex) {
+      throw new RuntimeException(ex);
+    }
   }
 
   @Override
