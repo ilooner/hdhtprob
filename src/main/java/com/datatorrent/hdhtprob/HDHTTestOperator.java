@@ -10,6 +10,7 @@ import com.datatorrent.contrib.hdht.AbstractSinglePortHDHTWriter;
 import com.datatorrent.lib.appdata.gpo.GPOUtils;
 import com.datatorrent.netlet.util.Slice;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,44 +58,48 @@ public class HDHTTestOperator extends AbstractSinglePortHDHTWriter<Double>
   @Override
   protected HDHTCodec<Double> getCodec()
   {
-    return new HDHTCodec<Double>() {
+    return new MyCodec();
+  }
 
-      @Override
-      public byte[] getKeyBytes(Double event)
-      {
-        return null;
-      }
+  public class MyCodec implements HDHTCodec<Double>, Serializable
+  {
+    private static final long serialVersionUID = 201510020616L;
 
-      @Override
-      public byte[] getValueBytes(Double event)
-      {
-        return null;
-      }
+    @Override
+    public byte[] getKeyBytes(Double event)
+    {
+      return null;
+    }
 
-      @Override
-      public Double fromKeyValue(Slice slice, byte[] bytes)
-      {
-        return null;
-      }
+    @Override
+    public byte[] getValueBytes(Double event)
+    {
+      return null;
+    }
 
-      @Override
-      public Object fromByteArray(Slice fragment)
-      {
-        return null;
-      }
+    @Override
+    public Double fromKeyValue(Slice slice, byte[] bytes)
+    {
+      return null;
+    }
 
-      @Override
-      public Slice toByteArray(Double o)
-      {
-        return null;
-      }
+    @Override
+    public Object fromByteArray(Slice fragment)
+    {
+      return null;
+    }
 
-      @Override
-      public int getPartition(Double o)
-      {
-        return 0;
-      }
-    };
+    @Override
+    public Slice toByteArray(Double o)
+    {
+      return null;
+    }
+
+    @Override
+    public int getPartition(Double o)
+    {
+      return 0;
+    }
   }
 
   private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(HDHTTestOperator.class);
