@@ -40,7 +40,7 @@ public class HDHTTestOperator extends AbstractSinglePortHDHTWriter<Double>
       if (result != null) {
         long storedWindowId = GPOUtils.deserializeLong(result);
 
-        if (storedWindowId < windowId) {
+        if (storedWindowId > windowId) {
           LOG.info("The stored Window ID is less than the window ID {} {}", storedWindowId, windowId);
         }
       }
