@@ -43,11 +43,7 @@ public class HDHTTestOperator extends AbstractSinglePortHDHTWriter<Double>
   {
     byte[] result = null;
 
-    try {
-      result = this.get(bucket, new Slice(GPOUtils.serializeInt(0)));
-    } catch (IOException ex) {
-      throw new RuntimeException(ex);
-    }
+    result = load(bucket, new Slice(GPOUtils.serializeInt(0)));
 
     if (result != null) {
       long storedWindowId = GPOUtils.deserializeLong(result);
