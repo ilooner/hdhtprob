@@ -21,8 +21,6 @@ public class HDHTTestOperator extends AbstractSinglePortHDHTWriter<Double>
 {
   private long windowId;
   private transient boolean called = false;
-  private transient Random rand = new Random();
-  private int numBuckets = 6;
 
   @Override
   public void beginWindow(long windowId)
@@ -32,29 +30,13 @@ public class HDHTTestOperator extends AbstractSinglePortHDHTWriter<Double>
 
     if (!called) {
       called = true;
-
-      for(int bucketCounter = 0; bucketCounter < numBuckets; bucketCounter++) {
-        checkBucket(bucketCounter);
-      }
+      checkBucket(0L);
     }
   }
 
   @Override
   public void processEvent(Double val)
   {
-    int key = rand.nextInt(Integer.MAX_VALUE - 1) + 1;
-
-    try {
-      this.get(rand.nextInt(numBuckets), new Slice(GPOUtils.serializeInt(key)));
-    } catch (IOException ex) {
-      throw new RuntimeException(ex);
-    }
-
-    try {
-      this.put(rand.nextInt(numBuckets), new Slice(GPOUtils.serializeInt(key)), GPOUtils.serializeDouble(val));
-    } catch (IOException ex) {
-      throw new RuntimeException(ex);
-    }
   }
 
   private void checkBucket(long bucket)
@@ -76,13 +58,26 @@ public class HDHTTestOperator extends AbstractSinglePortHDHTWriter<Double>
     }
   }
 
+  public byte[] load(long bucketID, Slice keySlice)
+  {
+    byte[] val = getUncommitted(bucketID, keySlice);
+
+    if(val == null) {
+      try {
+        val = get(bucketID, keySlice);
+      }
+      catch(IOException ex) {
+        throw new RuntimeException(ex);
+      }
+    }
+
+    return val;
+  }
+
   @Override
   public void endWindow()
   {
-    for (int bucketCounter = 0; bucketCounter < numBuckets; bucketCounter++) {
-      putBucket(bucketCounter);
-    }
-
+    putBucket(0);
     super.endWindow();
   }
 

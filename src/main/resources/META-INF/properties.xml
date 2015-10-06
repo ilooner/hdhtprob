@@ -14,11 +14,11 @@
   -->
   <property>
     <name>dt.operator.*.attr.APPLICATION_WINDOW_COUNT</name>
-    <value>1</value>
+    <value>60</value>
   </property>
   <property>
     <name>dt.operator.*.attr.CHECKPOINT_WINDOW_COUNT</name>
-    <value>1</value>
+    <value>60</value>
   </property>
 </configuration>
 
